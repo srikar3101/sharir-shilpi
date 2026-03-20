@@ -2252,7 +2252,7 @@
     // Paste your Cloudflare Worker URL below.
     // The worker holds your API key securely server-side.
     // ============================================================
-    const PROXY_URL = '';  // <-- e.g. 'sharir-shilpi-proxy.srikar-3101.workers.dev'
+    const PROXY_URL = 'https://sharir-shilpi-proxy.srikar-3101.workers.dev';  // <-- e.g. 'sharir-shilpi-proxy.srikar-3101.workers.dev'
 
     async function anthropicFetch(prompt, maxTokens = 600) {
       if (!PROXY_URL || PROXY_URL.trim() === '') {
