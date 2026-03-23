@@ -213,7 +213,7 @@ h1, .screen-title {
     transition: var(--transition);
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: auto; /* Fluid height */
 }
 .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
@@ -260,18 +260,27 @@ h1, .screen-title {
 @media (min-width: 769px) {
     #main-app {
         grid-template-areas: "side content";
-        grid-template-columns: auto 1fr;
+        grid-template-columns: var(--sidebar-w) 1fr;
     }
-    .sidebar { display: flex; }
-    .main-content { margin-left: var(--sidebar-fx); } /* Fallback for older browsers? No, grid is better. */
-    
-    #main-app {
-        align-items: stretch; /* Ensure columns span full height */
+    .sidebar {
+        display: flex;
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        width: var(--sidebar-w);
+        background: var(--bg-s);
+        border-right: 1px solid var(--border);
+        flex-direction: column;
+        padding: var(--space-l) var(--space-m);
+        z-index: 100;
+    }
+    .main-content {
+        margin-left: var(--sidebar-w); /* Fix overlap */
+        width: calc(100% - var(--sidebar-w));
     }
     .tab-bar { display: none; }
-    
-    .grid-metrics { grid-template-columns: repeat(2, 1fr); align-items: stretch; }
-    .grid-main { grid-template-columns: 2fr 1fr; gap: var(--space-l); }
+
+    .grid-metrics { grid-template-columns: repeat(2, 1fr); align-items: flex-start; }
+    .grid-main { grid-template-columns: 2fr 1fr; gap: var(--space-l); align-items: flex-start; }
 }
 
 /* LAPTOP / DESKTOP (Full Grid) */
