@@ -66,6 +66,7 @@
               <div style="flex:1; font-size:12px; display:flex; flex-direction:column; gap:4px;">
                 <div style="display:flex; justify-content:space-between;"><span class="text-secondary">In</span><span style="font-weight:600;" id="dash-food-in">0</span></div>
                 <div style="display:flex; justify-content:space-between;"><span class="text-secondary">Out</span><span style="font-weight:600;" id="dash-burned">0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span class="text-secondary">Budget</span><span style="font-weight:600;" id="dash-budget">0</span></div>
               </div>
             </div>
           </div>
@@ -75,20 +76,29 @@
         <div class="card">
           <div class="card-label">Macros</div>
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
-            <div>
-              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Protein</div>
-              <div style="font-weight:600; font-family:'DM Mono';" id="dash-p">0g</div>
-              <div class="prog-bar"><div class="prog-fill" id="prog-p" style="background:var(--accent-primary); width:0%;"></div></div>
+            <div class="macro-item">
+              <div class="macro-label">Protein</div>
+              <div class="macro-val-row">
+                <div style="font-weight:600; font-family:'DM Mono';" id="dash-p">0g</div>
+                <div style="font-size:10px; opacity:0.6;" id="dash-pt">/ 0g</div>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-p" style="background:var(--accent); width:0%;"></div></div>
             </div>
-            <div>
-              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Carbs</div>
-              <div style="font-weight:600; font-family:'DM Mono';" id="dash-c">0g</div>
-              <div class="prog-bar"><div class="prog-fill" id="prog-c" style="background:var(--accent-warning); width:0%;"></div></div>
+            <div class="macro-item">
+              <div class="macro-label">Carbs</div>
+              <div class="macro-val-row">
+                <div style="font-weight:600; font-family:'DM Mono';" id="dash-c">0g</div>
+                <div style="font-size:10px; opacity:0.6;" id="dash-ct">/ 0g</div>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-c" style="background:var(--amber); width:0%;"></div></div>
             </div>
-            <div>
-              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Fat</div>
-              <div style="font-weight:600; font-family:'DM Mono';" id="dash-f">0g</div>
-              <div class="prog-bar"><div class="prog-fill" id="prog-f" style="background:var(--accent-error); width:0%;"></div></div>
+            <div class="macro-item">
+              <div class="macro-label">Fat</div>
+              <div class="macro-val-row">
+                <div style="font-weight:600; font-family:'DM Mono';" id="dash-f">0g</div>
+                <div style="font-size:10px; opacity:0.6;" id="dash-ft">/ 0g</div>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-f" style="background:var(--red); width:0%;"></div></div>
             </div>
           </div>
         </div>

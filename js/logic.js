@@ -19,12 +19,17 @@ export function calcBMR(p) {
 }
 
 export function calcTDEE(p) {
-  return Math.round(calcBMR(p) * p.actMult);
+  if (!p) return 2000;
+  const bmr = calcBMR(p);
+  const mult = p.actMult || 1.2;
+  return Math.round(bmr * mult);
 }
 
 export function getDailyBudget(profile) {
   if (!profile) return 2000;
-  return state.getCalOverride() || Math.round(calcTDEE(profile) - (profile.pace * 7700 / 7));
+  const tdee = calcTDEE(profile);
+  const pace = profile.pace || 0.5;
+  return state.getCalOverride() || Math.round(tdee - (pace * 7700 / 7));
 }
 
 export function calcBurn(wl) {
@@ -61,51 +66,68 @@ export function pctProg(profile) {
   return Math.min(100, Math.max(0, Math.round(((profile.weight - getLatestW(profile)) / tot) * 100)));
 }
 
-export function calcStreak() {
-  let s = 0;
-  for (let i = 0; i < 90; i++) {
-    const dk = new Date();
-    dk.setDate(dk.getDate() - i);
-    const key = dk.toISOString().slice(0, 10);
-    const dd = localStorage.getItem('vd_' + key); // Direct access for streak calc efficiency
-    if (dd) {
-      const data = JSON.parse(dd);
-      const hasLog = data.weight || Object.values(data.foodLog || {}).some(m => m.length > 0) || (data.workoutLog || []).length > 0;
-      if (hasLog) s++;
-      else if (i > 0) break;
-    } else if (i > 0) break;
+export async function calcStreak(email) {
+  if (!email) return 0;
+  // Get 90 days of range data
+  const end = new Date().toISOString().slice(0, 10);
+  const start = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  
+  try {
+    const { logService } = await import('./service.js');
+    const rangeData = await logService.getRange(email, start, end);
+    let s = 0;
+    for (let i = 0; i < 90; i++) {
+        const dk = new Date();
+        dk.setDate(dk.getDate() - i);
+        const key = dk.toISOString().slice(0, 10);
+        const data = rangeData[key];
+        if (data) {
+            const hasLog = data.hasWeight || data.hasFood || data.hasWorkout || data.hasWater;
+            if (hasLog) s++;
+            else if (i > 0) break;
+        } else if (i > 0) break;
+    }
+    return Math.max(1, s);
+  } catch (e) {
+    console.error("Streak calc failed", e);
+    return 1;
   }
-  return Math.max(1, s);
 }
 
 export function calcMacroTargets(profile) {
   if (!profile) return { p: 150, c: 200, f: 65 };
-  const w = getLatestW(profile);
-  const budget = getDailyBudget(profile);
+  const w = getLatestW(profile) || 70;
+  const budget = getDailyBudget(profile) || 2000;
   const p = Math.round(1.8 * w);
   const f = Math.round((budget * 0.25) / 9);
   const c = Math.round((budget - (p * 4) - (f * 9)) / 4);
   return { p, c: Math.max(50, c), f };
 }
 
-export function rebuildPRs() {
-  const prs = {};
-  for (let i = 0; i < 90; i++) {
-    const dk = new Date();
-    dk.setDate(dk.getDate() - i);
-    const key = dk.toISOString().slice(0, 10);
-    const dd = state.getDayData(key);
-    if (!dd || (dd.workoutLog || []).length === 0) continue;
-    for (const w of dd.workoutLog) {
-      if (w.type !== 'strength' || !w.weight || w.weight <= 0) continue;
-      const ex = w.name;
-      if (!prs[ex] || w.weight > prs[ex].w || (w.weight === prs[ex].w && (w.reps || 0) > prs[ex].r)) {
-        prs[ex] = { w: w.weight, r: w.reps || 0, s: w.sets || 0, date: key };
-      }
-    }
+export async function rebuildPRs(email) {
+  if (!email) return {};
+  try {
+    const { logService } = await import('./service.js');
+    const end = new Date().toISOString().slice(0, 10);
+    const start = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    
+    const workouts = await logService.getWorkoutRange(email, start, end);
+    
+    const prs = {};
+    workouts.forEach(w => {
+        if (w.type !== 'strength' || !w.weight || w.weight <= 0) return;
+        const ex = w.name;
+        if (!prs[ex] || w.weight > prs[ex].w || (w.weight === prs[ex].w && (w.reps || 0) > prs[ex].r)) {
+            prs[ex] = { w: w.weight, r: w.reps || 0, s: w.sets || 0, date: w.date };
+        }
+    });
+
+    state.savePRs(prs);
+    return prs;
+  } catch (e) {
+    console.error("PR rebuild failed", e);
+    return {};
   }
-  state.savePRs(prs);
-  return prs;
 }
 
 export function calcCardioBurnFull(ak, dur, weight, dist, incline, hr, profile) {

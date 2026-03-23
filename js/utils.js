@@ -44,6 +44,7 @@ export function formatDate(date) {
 }
 
 export function animateCount(el, from, to, dur = 600, suffix = '') {
+  if (!el) return;
   const start = performance.now();
   const update = (now) => {
     const pct = Math.min((now - start) / dur, 1);

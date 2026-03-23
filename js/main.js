@@ -1,7 +1,8 @@
+// v1.0.2 - Cache Busting
 import * as state from './state.js';
 import * as logic from './logic.js';
 import * as ui from './ui.js';
-import { auth, data } from './service.js';
+import { auth, profileService, logService, historyService, configService } from './service.js';
 import { showToast, addRipple } from './utils.js';
 
 // Global state for temporary UI interactions
@@ -132,19 +133,19 @@ window.app = {
   },
 
   // --- NAVIGATION ---
-  switchTab: (tab, el, keepDate) => {
+  switchTab: async (tab, el, keepDate) => {
     const screens = document.querySelectorAll('.screen');
     const navItems = document.querySelectorAll('.nav-item');
-    const tabBtns = document.querySelectorAll('.tab-btn');
     
     screens.forEach(s => s.classList.remove('active'));
     navItems.forEach(n => n.classList.remove('active'));
-    tabBtns.forEach(b => b.classList.remove('active'));
     
     const targetScreen = document.getElementById('screen-' + tab);
     if (targetScreen) targetScreen.classList.add('active');
     
-    document.querySelectorAll(`[onclick*="'${tab}'"]`).forEach(btn => btn.classList.add('active'));
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+    });
     
     currentScreen = tab;
     
@@ -153,7 +154,7 @@ window.app = {
         state.store.dayData = state.getDayData(state.store.viewDate);
     }
     
-    if (tab === 'dash') ui.renderDashboard(state.store.profile);
+    if (tab === 'dash') await ui.renderDashboard(state.store.profile);
     else if (tab === 'weight') ui.renderWeightHistory();
     else if (tab === 'food') ui.renderFoodLog(state.store.viewDate);
     else if (tab === 'workout') ui.renderWorkoutLog(state.store.viewDate);
@@ -165,7 +166,7 @@ window.app = {
   },
 
   // --- CORE APP ACTIONS ---
-  saveProfile: () => {
+  saveProfile: async () => {
     const name = document.getElementById('ob-name').value.trim();
     const age = parseFloat(document.getElementById('ob-age').value);
     const height = parseFloat(document.getElementById('ob-height').value);
@@ -176,15 +177,7 @@ window.app = {
       return showToast('Please fill all fields correctly');
     }
     
-    state.store.profile = {
-      name,
-      sex: document.getElementById('ob-sex').value,
-      age, height, weight, targetWeight,
-      pace: parseFloat(document.getElementById('ob-pace').value),
-      actMult: parseFloat(document.getElementById('ob-activity').value),
-      startDate: state.todayKey()
-    };
-    
+    await state.saveProfileData(state.store.profile);
     initApp();
   },
 
@@ -196,12 +189,17 @@ window.app = {
     showToast('Weight logged');
   },
 
-  shiftDate: (delta) => {
+  shiftDate: async (delta) => {
     const date = new Date(state.store.viewDate + 'T12:00:00');
     date.setDate(date.getDate() + delta);
     const newKey = date.toISOString().split('T')[0];
     state.store.viewDate = newKey;
-    state.store.dayData = state.getDayData(newKey);
+    
+    const { logService } = await import('./service.js');
+    const user = auth.getCurrentUser();
+    if (user) {
+        state.store.dayData = await logService.getDaily(user.email, newKey);
+    }
   },
 
   addWater: (glasses) => {
@@ -231,6 +229,11 @@ window.app = {
     state.addFood(mealType || 'breakfast', foodObj);
     window.app.closeAddFood();
     showToast(`Added ${foodObj.name}`);
+  },
+
+  removeFood: async (meal, index) => {
+    await state.removeFood(meal, index);
+    showToast('Food removed');
   },
 
   // --- WORKOUT MODAL ---
@@ -309,6 +312,11 @@ window.app = {
     showToast('Strength logged');
   },
 
+  removeWorkout: async (index) => {
+    await state.removeWorkout(index);
+    showToast('Workout removed');
+  },
+
   // --- PROFILE & SETTINGS ---
   updateProfile: () => {
     const weight = parseFloat(document.getElementById('edit-weight').value);
@@ -364,13 +372,15 @@ function buildNavUI() {
     navs.forEach(n => {
         const sBtn = document.createElement('button');
         sBtn.className = 'nav-item magnetic';
-        sBtn.onclick = () => window.app.switchTab(n.id, sBtn);
+        sBtn.setAttribute('data-tab', n.id);
+        sBtn.onclick = () => window.app.switchTab(n.id);
         sBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg><span>${n.label}</span>`;
         if (sidebar) sidebar.appendChild(sBtn);
         
         const tBtn = document.createElement('button');
         tBtn.className = 'tab-btn';
-        tBtn.onclick = () => window.app.switchTab(n.id, tBtn);
+        tBtn.setAttribute('data-tab', n.id);
+        tBtn.onclick = () => window.app.switchTab(n.id);
         tBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg><span>${n.label}</span>`;
         if (tabs) tabs.appendChild(tBtn);
     });
@@ -378,69 +388,73 @@ function buildNavUI() {
 
 // Initialize app
 async function initApp() {
-  const loader = document.getElementById('app-loader');
+  const loader = document.getElementById('loader');
   if (loader) loader.style.display = 'flex';
 
-  // 1. Load Components
-  await window.app.loadComponents();
-  buildNavUI();
-
-  // 2. Theme
-  const savedTheme = localStorage.getItem('ss_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  const icon = document.getElementById('theme-icon-sidebar');
-  if (icon) icon.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
-  
-  if (window.animations) {
-    window.animations.updateThemeColors(savedTheme === 'dark');
-  }
-
-  const user = auth.getCurrentUser();
-  const authContainer = document.getElementById('auth-container');
-  const onboarding = document.getElementById('onboarding-container');
-  const mainApp = document.getElementById('main-app');
-
-  if (!user) {
-    if (loader) loader.style.display = 'none';
-    state.loadUserContext(null); // Clear state
-    authContainer.classList.remove('hidden');
-    onboarding.classList.add('hidden');
-    mainApp.classList.add('hidden');
-    return;
-  }
-  
-  // Load user data from backend
   try {
-    const remoteState = await data.loadAppState(user.email);
-    state.loadUserContext(user.email, remoteState);
-  } catch (e) {
-    console.error("Failed to load user state", e);
-    state.loadUserContext(user.email);
-  }
-  authContainer.classList.add('hidden');
-  
-  if (!state.store.profile) {
-    onboarding.classList.remove('hidden');
-    mainApp.classList.add('hidden');
-    return;
-  }
-  
-  onboarding.classList.add('hidden');
-  mainApp.classList.remove('hidden');
-  mainApp.style.display = 'flex'; // Ensure flex layout
-  
-  // Reactivity
-  state.onChange((prop, val) => {
-    if (prop === 'profile' || prop === 'dayData' || prop === 'viewDate') {
-      ui.renderDashboard(state.store.profile);
-      ui.renderFoodLog(state.store.viewDate);
-      ui.renderWorkoutLog(state.store.viewDate);
-      ui.renderProfile(state.store.profile);
-    }
-  });
+    // 1. Load Components
+    await window.app.loadComponents();
+    buildNavUI();
 
-  window.app.switchTab('dash');
-  window.dispatchEvent(new CustomEvent('ss-content-updated'));
+    // 2. Theme
+    const savedTheme = localStorage.getItem('ss_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const icon = document.getElementById('theme-icon-sidebar');
+    if (icon) icon.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+    
+    if (window.animations) {
+      window.animations.updateThemeColors(savedTheme === 'dark');
+    }
+
+    const user = auth.getCurrentUser();
+    const authContainer = document.getElementById('auth-container');
+    const onboarding = document.getElementById('onboarding-container');
+    const mainApp = document.getElementById('main-app');
+
+    if (!user) {
+      state.loadUserContext(null); // Clear state
+      authContainer.classList.remove('hidden');
+      onboarding.classList.add('hidden');
+      mainApp.classList.add('hidden');
+      return;
+    }
+    
+    // Load user data from backend
+    try {
+      await state.loadUserContext(user.email);
+    } catch (e) {
+      console.error("Failed to load user state", e);
+    }
+    authContainer.classList.add('hidden');
+    
+    if (!state.store.profile) {
+      onboarding.classList.remove('hidden');
+      mainApp.classList.add('hidden');
+      return;
+    }
+    
+    onboarding.classList.add('hidden');
+    mainApp.classList.remove('hidden');
+    mainApp.style.display = 'flex'; // Ensure flex layout
+    
+    // Reactivity
+    state.onChange(async (prop, val) => {
+      if (prop === 'profile' || prop === 'dayData' || prop === 'viewDate') {
+        await ui.renderDashboard(state.store.profile);
+        ui.renderFoodLog(state.store.viewDate);
+        ui.renderWorkoutLog(state.store.viewDate);
+        ui.renderProfile(state.store.profile);
+      }
+    });
+
+    await window.app.switchTab('dash');
+    window.dispatchEvent(new CustomEvent('ss-content-updated'));
+  } catch (err) {
+    console.error("InitApp critical failure:", err);
+  } finally {
+    const loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'none';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

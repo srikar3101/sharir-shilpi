@@ -5,26 +5,35 @@ import { animateCount, showToast } from './utils.js';
 // Chart instance
 let wcInst = null;
 
-export function renderDashboard(profile) {
+export async function renderDashboard(profile) {
   if (!profile) return;
   const d = state.getDayData(state.todayKey());
   const latestW = logic.getLatestW(profile);
   const h = new Date().getHours();
+  const streak = await logic.calcStreak(profile.email);
 
-  document.getElementById('dash-greeting').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', ' + profile.name;
+  document.getElementById('dash-greeting').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', ' + (profile.name || 'User');
   document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('streak-pill').textContent = 'Day ' + logic.calcStreak();
+  document.getElementById('streak-pill').textContent = 'Day ' + streak;
+
+  const email = profile.email;
+  const viewDate = state.store.viewDate;
+  renderStreakCal(email, viewDate);
 
   // Weight
-  document.getElementById('prog-today').textContent = latestW.toFixed(1) + ' kg';
-  document.getElementById('prog-target').textContent = profile.targetWeight.toFixed(1) + ' kg';
+  if (latestW) {
+    document.getElementById('prog-today').textContent = latestW.toFixed(1) + ' kg';
+  }
+  if (profile.targetWeight) {
+    document.getElementById('prog-target').textContent = profile.targetWeight.toFixed(1) + ' kg';
+  }
   animateCount(document.getElementById('prog-days'), 0, logic.daysToTarget(profile), 600);
 
   const pct = logic.pctProg(profile);
   document.getElementById('weight-prog-fill').style.width = pct + '%';
   document.getElementById('prog-pct').textContent = pct + '%';
-  document.getElementById('prog-start-lbl').textContent = profile.weight + ' kg';
-  document.getElementById('prog-target-lbl').textContent = profile.targetWeight + ' kg';
+  document.getElementById('prog-start-lbl').textContent = (profile.weight || 0) + ' kg';
+  document.getElementById('prog-target-lbl').textContent = (profile.targetWeight || 0) + ' kg';
 
   // Cals
   const ft = logic.calcFood(d.foodLog);
@@ -33,10 +42,15 @@ export function renderDashboard(profile) {
   const net = ft.cal - burned;
   const deficit = budget - net;
 
-  document.getElementById('dash-food-in').textContent = ft.cal + ' kcal';
-  document.getElementById('dash-burned').textContent = burned + ' kcal';
-  document.getElementById('dash-budget').textContent = budget + ' kcal';
-  animateCount(document.getElementById('ring-net'), 0, net, 500);
+  const elIn = document.getElementById('dash-food-in');
+  const elOut = document.getElementById('dash-burned');
+  const elBudget = document.getElementById('dash-budget');
+  const elNet = document.getElementById('ring-net');
+
+  if (elIn) elIn.textContent = ft.cal + ' kcal';
+  if (elOut) elOut.textContent = burned + ' kcal';
+  if (elBudget) elBudget.textContent = budget + ' kcal';
+  if (elNet) animateCount(elNet, 0, net, 500);
 
   const de = document.getElementById('dash-deficit');
   if (de) {
@@ -124,10 +138,16 @@ export function animateCalRing(pct, color) {
   requestAnimationFrame(anim);
 }
 
-export function renderStreakCal(viewDate) {
+export async function renderStreakCal(email, viewDate) {
   const grid = document.getElementById('streak-cal');
-  if (!grid) return;
+  if (!grid || !email) return;
   const tk = state.todayKey();
+  
+  // Get 30 days of range data
+  const start = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const { logService } = await import('./service.js');
+  const rangeData = await logService.getRange(email, start, tk);
+
   const currentMonthStart = () => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
@@ -136,19 +156,19 @@ export function renderStreakCal(viewDate) {
 
   const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   let h = days.map(d => `<div class="cal-day-label">${d}</div>`).join('');
-  const start = new Date(); start.setDate(start.getDate() - 29);
-  for (let i = 0; i < start.getDay(); i++) h += '<div class="cal-cell future"></div>';
+  const startDate = new Date(); startDate.setDate(startDate.getDate() - 29);
+  for (let i = 0; i < startDate.getDay(); i++) h += '<div class="cal-cell future"></div>';
 
   for (let i = 0; i < 30; i++) {
-    const d = new Date(start); d.setDate(d.getDate() + i);
+    const d = new Date(startDate); d.setDate(d.getDate() + i);
     const key = d.toISOString().slice(0, 10);
-    const dd = localStorage.getItem('vd_' + key);
+    const data = rangeData[key];
+    
     let hasLog = false;
     let full = false;
-    if (dd) {
-      const data = JSON.parse(dd);
-      hasLog = data.weight || Object.values(data.foodLog || {}).some(m => m.length > 0) || (data.workoutLog || []).length > 0;
-      full = data.weight && Object.values(data.foodLog || {}).some(m => m.length > 0);
+    if (data) {
+      hasLog = data.hasWeight || data.hasFood || data.hasWorkout || data.hasWater;
+      full = data.hasWeight && data.hasFood; // Simplified for "full"
     }
     const isT = key === tk;
     const isPast = key <= tk;

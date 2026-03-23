@@ -1,4 +1,4 @@
-import { ls } from './utils.js';
+import { ls, ss } from './utils.js';
 import { auth, profileService, logService, historyService, configService } from './service.js';
 
 // No more catch-all debounceSave. We will save specifically on item change.
@@ -25,7 +25,7 @@ function getScoped(base, email, fallback) {
 
 function setScoped(base, email, val) {
   if (!email) return;
-  ls(base + email, val);
+  ss(base + email, val);
 }
 
 export const store = new Proxy({
@@ -62,6 +62,7 @@ onChange(async (prop, val) => {
         await logService.saveWeight(currentUser, latest.date, latest.w);
     }
     if (prop === 'dayData') {
+        // Water is still saved here, but food/workouts have explicit save/delete
         await logService.saveWater(currentUser, store.viewDate, val.water);
     }
     if (prop === 'customFoods') {
@@ -77,6 +78,12 @@ onChange(async (prop, val) => {
     console.error(`Failed to sync ${prop} to server`, e);
   }
 });
+
+export async function saveProfileData(data) {
+    if (!currentUser) return;
+    store.profile = data;
+    await profileService.save({ email: currentUser, ...data });
+}
 
 export async function loadUserContext(email) {
     currentUser = email;
@@ -108,23 +115,19 @@ export async function loadUserContext(email) {
         store.viewDate = todayKey();
     } catch (e) {
         console.error("Failed to load user context from server", e);
-        // Fallback to legacy localStorage (optional, but good for migrations)
-        store.profile = getScoped(K_PROFILE, email, null);
-        store.weightHistory = getScoped(K_WH, email, []);
-        store.viewDate = todayKey();
-        store.dayData = getDayData(store.viewDate);
+        store.profile = null;
     }
 }
 
 export function getDayData(k) {
-  if (!currentUser) return { foodLog: { breakfast: [], lunch: [], snacks: [], dinner: [] }, workoutLog: [], water: 0 };
-  const key = K_VD + currentUser + '_' + k;
-  return ls(key, {
+  // Return current store data if matches, else return empty (will be updated by shiftDate)
+  if (store.viewDate === k) return store.dayData;
+  return {
     weight: null,
     foodLog: { breakfast: [], lunch: [], snacks: [], dinner: [] },
     workoutLog: [],
     water: 0
-  });
+  };
 }
 
 // Legacy helper compatibility
@@ -140,15 +143,54 @@ export async function logWeight(w) {
 export async function addFood(meal, food) {
     const log = { ...store.dayData.foodLog };
     if (!log[meal]) log[meal] = [];
-    log[meal].push(food);
+    
+    // Optimistic add (no ID yet)
+    const tempIdx = log[meal].push(food) - 1;
     store.dayData = { ...store.dayData, foodLog: log };
-    // Trigger explicit API save
-    await logService.saveFood(currentUser, store.viewDate, meal, food);
+
+    try {
+        const result = await logService.saveFood(currentUser, store.viewDate, meal, food);
+        if (result && result.id) {
+            store.dayData.foodLog[meal][tempIdx].id = result.id;
+        }
+    } catch (e) {
+        console.error("Failed to save food", e);
+    }
 }
+
+export async function removeFood(meal, index) {
+    const food = store.dayData.foodLog[meal][index];
+    if (food && food.id) {
+        await logService.deleteFood(food.id);
+    }
+    const log = { ...store.dayData.foodLog };
+    log[meal].splice(index, 1);
+    store.dayData = { ...store.dayData, foodLog: log };
+}
+
 export async function addWorkout(wo) {
-    store.dayData = { ...store.dayData, workoutLog: [...store.dayData.workoutLog, { ...wo, id: Date.now() }] };
-    // Trigger explicit API save
-    await logService.saveWorkout(currentUser, store.viewDate, wo);
+    // Optimistic add
+    const tempIdx = store.dayData.workoutLog.push(wo) - 1;
+    store.dayData = { ...store.dayData, workoutLog: [...store.dayData.workoutLog] };
+
+    try {
+        const result = await logService.saveWorkout(currentUser, store.viewDate, wo);
+        if (result && result.id) {
+            store.dayData.workoutLog[tempIdx].id = result.id;
+        }
+    } catch (e) {
+        console.error("Failed to save workout", e);
+    }
+}
+
+export async function removeWorkout(index) {
+    const wo = store.dayData.workoutLog[index];
+    if (wo && wo.id) {
+        await logService.deleteWorkout(wo.id);
+    }
+    const list = [...store.dayData.workoutLog];
+    list.splice(index, 1);
+    store.dayData = { ...store.dayData, workoutLog: list };
 }
 
 // Added for logic.js compatibility

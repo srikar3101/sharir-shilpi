@@ -23,11 +23,11 @@ export const auth = {
     });
     const result = await resp.json();
     if (!resp.ok) throw new Error(result.error || 'Login failed');
-    ls('ss_active_user_data', result);
+    ss('ss_active_user_data', result);
     return result;
   },
 
-  logout: () => ls('ss_active_user_data', null),
+  logout: () => ss('ss_active_user_data', null),
   getCurrentUser: () => ls('ss_active_user_data', null)
 };
 
@@ -59,18 +59,30 @@ export const logService = {
     });
   },
   saveFood: async (email, date, meal_type, food) => {
-    await fetch(`${API_BASE}/food`, {
+    const resp = await fetch(`${API_BASE}/food`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, date, meal_type, ...food })
     });
+    return await resp.json();
+  },
+  deleteFood: async (id) => {
+    await fetch(`${API_BASE}/food/${id}`, { method: 'DELETE' });
   },
   saveWorkout: async (email, date, wo) => {
-    await fetch(`${API_BASE}/workout`, {
+    const resp = await fetch(`${API_BASE}/workout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, date, ...wo })
     });
+    return await resp.json();
+  },
+  deleteWorkout: async (id) => {
+    await fetch(`${API_BASE}/workout/${id}`, { method: 'DELETE' });
+  },
+  getWorkoutRange: async (email, start, end) => {
+    const resp = await fetch(`${API_BASE}/workout/range?email=${encodeURIComponent(email)}&start=${start}&end=${end}`);
+    return await resp.json();
   },
   saveWater: async (email, date, water) => {
     await fetch(`${API_BASE}/water`, {
@@ -78,6 +90,10 @@ export const logService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, date, water })
     });
+  },
+  getRange: async (email, start, end) => {
+    const resp = await fetch(`${API_BASE}/logs/range?email=${encodeURIComponent(email)}&start=${start}&end=${end}`);
+    return await resp.json();
   }
 };
 
@@ -112,3 +128,5 @@ export const configService = {
     });
   }
 };
+
+export const data = { loadAppState: async () => ({}) };
