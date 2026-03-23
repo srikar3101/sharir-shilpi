@@ -1,0 +1,29 @@
+<!-- FOOD MODAL -->
+<div class="modal-overlay" id="food-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Add Food</div>
+      <button class="modal-close" onclick="window.app.closeAddFood()">✕</button>
+    </div>
+    <div class="food-search-wrap">
+       <input type="text" class="form-input" id="fm-search" placeholder="Search food..." oninput="window.app.searchFood(this.value)" />
+       <div id="food-results" class="food-results-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKOUT LOG SHEET -->
+<div class="modal-overlay" id="log-sheet">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="workout-type-row">
+      <div class="wtype-btn active" id="wtype-cardio" onclick="window.app.setWType('cardio',this)">Cardio</div>
+      <div class="wtype-btn" id="wtype-strength" onclick="window.app.setWType('strength',this)">Strength</div>
+    </div>
+    <div id="wo-forms">
+       <!-- Form content injected or toggled -->
+    </div>
+    <button class="btn btn-secondary" onclick="window.app.closeLogSheet()">Close</button>
+  </div>
+</div>

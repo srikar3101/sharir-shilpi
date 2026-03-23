@@ -1,0 +1,31 @@
+{
+  "name": "sharir-shilpi",
+  "version": "1.0.0",
+  "description": "**Sharir Shilpi** (Body Sculptor) is a premium, modular fitness tracking web application designed to help you sculpt your body with intention. It provides a comprehensive suite of tools for monitoring nutrition, workouts, and weight progress, all enhanced with AI-driven insights.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "concurrently \"python -m http.server 8080\" \"node server/server.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srikar3101/sharir-shilpi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/srikar3101/sharir-shilpi/issues"
+  },
+  "homepage": "https://github.com/srikar3101/sharir-shilpi#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  }
+}

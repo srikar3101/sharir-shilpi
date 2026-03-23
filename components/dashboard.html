@@ -1,0 +1,118 @@
+<div id="screen-dash" class="screen">
+  <div class="screen-container">
+    <header class="screen-header">
+      <div>
+        <h1 id="dash-greeting">Good morning</h1>
+        <p class="screen-sub" id="dash-date"></p>
+      </div>
+      <span class="pill pill-green" id="streak-pill">Day 1</span>
+    </header>
+
+    <div class="grid-main">
+      <div class="main-column">
+        <!-- AI Insight -->
+        <div class="card insight-card" style="margin-bottom: 24px;">
+          <div class="buddy-wrap">
+            <div id="buddy-container" class="buddy-figure"></div>
+            <div class="buddy-bubble">
+              <div class="insight-badge"><span class="idot pulse"></span> Daily insight</div>
+              <div id="insight-text">
+                <div class="shimmer"></div>
+                <div class="shimmer" style="width:80%"></div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="regen-btn" onclick="window.app.fetchAIInsight(true)" style="display:none; margin-top:12px;">↺ Refresh</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-metrics">
+          <!-- Weight Card -->
+          <div class="card">
+            <div class="card-label">Weight progress</div>
+            <div class="metric-row" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+              <div>
+                <div class="text-muted" style="font-size:12px;">Current</div>
+                <div style="font-size:24px; font-weight:700; font-family:'DM Mono';" id="prog-today">— kg</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="text-muted" style="font-size:12px;">Target</div>
+                <div style="font-size:20px; font-weight:600; color:var(--accent-success); font-family:'DM Mono';" id="prog-target">— kg</div>
+              </div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" id="weight-prog-fill"></div></div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-top:4px;">
+              <span id="prog-start-lbl">Start</span>
+              <span id="prog-pct">0%</span>
+              <span id="prog-target-lbl">Goal</span>
+            </div>
+          </div>
+
+          <!-- Calories Card -->
+          <div class="card">
+            <div class="card-label">Today's Calories</div>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="position:relative; width:80px; height:80px;">
+                <svg width="80" height="80" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg-elevated)" stroke-width="10" />
+                  <circle id="cal-ring" cx="50" cy="50" r="40" fill="none" stroke="var(--accent-success)" stroke-width="10"
+                    stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
+                    transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .6s ease;" />
+                </svg>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+                  <div style="font-size:16px; font-weight:700; font-family:'DM Mono';" id="ring-net">0</div>
+                  <div style="font-size:8px; text-transform:uppercase; color:var(--text-secondary);">net</div>
+                </div>
+              </div>
+              <div style="flex:1; font-size:12px; display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; justify-content:space-between;"><span class="text-secondary">In</span><span style="font-weight:600;" id="dash-food-in">0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span class="text-secondary">Out</span><span style="font-weight:600;" id="dash-burned">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macros -->
+        <div class="card">
+          <div class="card-label">Macros</div>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
+            <div>
+              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Protein</div>
+              <div style="font-weight:600; font-family:'DM Mono';" id="dash-p">0g</div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-p" style="background:var(--accent-primary); width:0%;"></div></div>
+            </div>
+            <div>
+              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Carbs</div>
+              <div style="font-weight:600; font-family:'DM Mono';" id="dash-c">0g</div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-c" style="background:var(--accent-warning); width:0%;"></div></div>
+            </div>
+            <div>
+              <div class="text-secondary" style="font-size:11px; margin-bottom:4px;">Fat</div>
+              <div style="font-weight:600; font-family:'DM Mono';" id="dash-f">0g</div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-f" style="background:var(--accent-error); width:0%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-column">
+        <!-- PRs -->
+        <div class="card" style="margin-bottom:24px;">
+          <div class="card-label">Gym PRs</div>
+          <div id="pr-container" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="text-muted" style="font-size:13px;">No PRs yet.</div>
+          </div>
+        </div>
+
+        <!-- Streak -->
+        <div class="card">
+          <div class="card-label">30-day streak</div>
+          <div id="streak-cal" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin-bottom:12px;"></div>
+          <div style="display:flex; gap:12px; font-size:10px; color:var(--text-secondary);">
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:1px; background:var(--accent-success); opacity:0.4;"></span> Logged</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:8px; height:8px; border-radius:1px; background:var(--accent-success);"></span> Goal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

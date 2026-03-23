@@ -1,0 +1,49 @@
+<div id="screen-profile" class="screen">
+  <div class="screen-container">
+    <header class="screen-header">
+      <div>
+        <h1>Profile</h1>
+        <p class="screen-sub">Your personal stats & settings</p>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="window.app.handleLogout()">Logout</button>
+    </header>
+
+    <div class="grid-main">
+      <div class="main-column">
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-label">Edit profile</div>
+          <div class="grid-metrics" style="gap:16px; margin-bottom:20px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Weight (kg)</label>
+              <input class="form-input" id="edit-weight" type="number" step="0.1" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Target (kg)</label>
+              <input class="form-input" id="edit-target" type="number" step="0.1" />
+            </div>
+          </div>
+          <button class="btn btn-primary w-100" onclick="window.app.updateProfile()">Update Profile</button>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Your stats</div>
+          <div id="profile-stats" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:16px;"></div>
+        </div>
+      </div>
+
+      <div class="side-column">
+        <div class="card">
+          <div class="card-label">Preferences</div>
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label">Appearance</label>
+            <button class="btn btn-secondary w-100" onclick="window.app.toggleTheme()" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+               <span id="theme-icon">🌙</span>
+               <span id="theme-text">Dark Mode</span>
+            </button>
+          </div>
+          <button class="btn btn-secondary w-100" onclick="window.app.resetApp()">Reset App Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

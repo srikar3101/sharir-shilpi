@@ -1,0 +1,51 @@
+<div id="screen-food" class="screen">
+  <div class="screen-container">
+    <header class="screen-header">
+      <div>
+        <h1>Food</h1>
+        <p class="screen-sub" id="food-date-sub">Track your nutrition</p>
+      </div>
+      <div class="card" style="padding: 12px 20px; display: flex; align-items: center; gap: 12px; background: var(--bg-elevated);">
+        <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="food-total-cal">0</div>
+        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); line-height: 1.2;">kcal<br>today</div>
+      </div>
+    </header>
+
+    <div class="grid-main">
+      <div class="main-column">
+        <div class="card" style="margin-bottom: 24px; padding: 12px;">
+          <div class="date-nav" style="border:none; box-shadow:none; background:transparent; margin-bottom:0;">
+            <button class="date-nav-arrow" onclick="window.app.shiftDate(-1)">&#8249;</button>
+            <div style="text-align:center;">
+              <div class="date-nav-label" id="food-nav-label" style="font-size:16px;">Today</div>
+              <div class="date-nav-sub" id="food-nav-sub" style="font-size:11px;"></div>
+            </div>
+            <button class="date-nav-arrow" onclick="window.app.shiftDate(1)">&#8250;</button>
+          </div>
+        </div>
+        
+        <div id="food-past-banner" style="display:none; text-align:center; padding:8px; background:var(--accent-warning); color:white; border-radius:8px; margin-bottom:16px; font-size:12px; font-weight:600;">Viewing past date</div>
+
+        <div id="meals-container" style="display:grid; gap:20px;">
+          <!-- Meals injected here -->
+        </div>
+        
+        <button class="btn btn-secondary" onclick="window.app.openAddFoodFor('breakfast')" style="margin-top:20px; width:100%;">+ Add food</button>
+      </div>
+
+      <div class="side-column">
+        <div class="card">
+          <div class="card-label">Water Intake</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+             <span id="water-pill" class="text-secondary" style="font-size:13px; font-weight:500;">0 / 8 glasses</span>
+          </div>
+          <div class="water-drops" id="water-drops" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px;"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+             <button class="btn btn-secondary btn-sm" onclick="window.app.setWater(window.app.getWater()+1)">+ 1</button>
+             <button class="btn btn-secondary btn-sm" onclick="window.app.setWater(window.app.getWater()+2)">+ 2</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

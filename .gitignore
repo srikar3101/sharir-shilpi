@@ -1,0 +1,15 @@
+# Browser dependencies
+node_modules/
+package-lock.json
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Local data / Temp
+/tmp/
+*.log
+*.sqlite
+.env

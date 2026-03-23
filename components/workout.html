@@ -1,0 +1,46 @@
+<div id="screen-workout" class="screen">
+  <div class="screen-container">
+    <header class="screen-header">
+      <div>
+        <h1>Workout</h1>
+        <p class="screen-sub">Log your physical activity</p>
+      </div>
+      <div class="card" style="padding: 12px 20px; display: flex; align-items: center; gap: 12px; background: var(--bg-elevated);">
+        <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="wo-total-burn">0</div>
+        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); line-height: 1.2;">kcal<br>burned</div>
+      </div>
+    </header>
+
+    <div class="grid-main">
+      <div class="main-column">
+        <div class="card" style="margin-bottom: 24px; padding: 12px;">
+          <div class="date-nav" style="border:none; box-shadow:none; background:transparent; margin-bottom:0;">
+            <button class="date-nav-arrow" onclick="window.app.shiftDate(-1)">&#8249;</button>
+            <div style="text-align:center;">
+              <div class="date-nav-label" id="wo-nav-label" style="font-size:16px;">Today</div>
+              <div class="date-nav-sub" id="wo-nav-sub" style="font-size:11px;"></div>
+            </div>
+            <button class="date-nav-arrow" onclick="window.app.shiftDate(1)">&#8250;</button>
+          </div>
+        </div>
+
+        <div id="workout-log-list-wrap" class="card">
+          <div class="card-label">Workout log</div>
+          <div id="workout-log-list" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="text-muted" style="padding:20px 0;">No workouts logged yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-column">
+        <div class="card">
+          <div class="card-label">Quick Actions</div>
+          <button class="btn btn-primary w-100" onclick="window.app.openLogSheet()" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Workout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

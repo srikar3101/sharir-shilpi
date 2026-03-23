@@ -1,0 +1,68 @@
+<div id="onboarding">
+  <div class="card onboarding-card">
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h1 class="sidebar-logo" style="padding:0; margin-bottom:8px; font-size:32px;">Sharir Shilpi</h1>
+      <p style="color:var(--text-secondary); font-size:15px; font-style:italic;">Your body is your temple. Shape it with intention.</p>
+    </div>
+
+    <div class="onboard-form">
+      <div class="form-group">
+        <label class="form-label">Your name</label>
+        <input class="form-input" id="ob-name" placeholder="e.g. Srikar" type="text" />
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Biological sex</label>
+          <select class="form-input" id="ob-sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Age</label>
+          <input class="form-input" id="ob-age" placeholder="28" type="number" min="10" max="100" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Height (cm)</label>
+          <input class="form-input" id="ob-height" placeholder="175" type="number" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current weight (kg)</label>
+          <input class="form-input" id="ob-weight" placeholder="82" type="number" step="0.1" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Target weight (kg)</label>
+          <input class="form-input" id="ob-target" placeholder="72" type="number" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Goal pace</label>
+          <select class="form-input" id="ob-pace">
+            <option value="0.25">Slow (0.25 kg/wk)</option>
+            <option value="0.5" selected>Moderate (0.5 kg/wk)</option>
+            <option value="0.75">Fast (0.75 kg/wk)</option>
+            <option value="1">Aggressive (1 kg/wk)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Activity level</label>
+        <select class="form-input" id="ob-activity">
+          <option value="1.2">Sedentary (desk job)</option>
+          <option value="1.375">Lightly active</option>
+          <option value="1.55" selected>Moderately active</option>
+          <option value="1.725">Very active</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary btn-flow magnetic w-100" style="margin-top: 12px;" onclick="window.app.saveProfile()">Get started →</button>
+    </div>
+  </div>
+</div>

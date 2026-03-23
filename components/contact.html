@@ -1,0 +1,41 @@
+<div id="screen-contact" class="screen">
+  <div class="screen-container">
+    <header class="screen-header">
+      <div>
+        <h1>Contact Us</h1>
+        <p class="screen-sub">We'd love to hear from you</p>
+      </div>
+    </header>
+
+    <div class="grid-main">
+      <div class="main-column">
+        <div class="card">
+          <div class="card-label">Send a message</div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <input class="form-input" id="contact-subject" type="text" placeholder="e.g. Feature request" />
+          </div>
+          <div class="form-group" style="margin-top: 16px;">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" id="contact-msg" style="height: 160px; resize: none;" placeholder="Your message..."></textarea>
+          </div>
+          <button class="btn btn-primary w-100" style="margin-top: 24px;" onclick="window.app.handleContactSubmit()">Send Message</button>
+        </div>
+      </div>
+
+      <div class="side-column">
+        <div class="card">
+          <div class="card-label">Connect</div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text-secondary);">
+              <span>🐦</span> Twitter
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; font-size:14px; color:var(--text-secondary);">
+              <span>📸</span> Instagram
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
