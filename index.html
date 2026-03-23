@@ -2403,7 +2403,8 @@
     // Paste your Cloudflare Worker URL below.
     // The worker holds your API key securely server-side.
     // ============================================================
-    const PROXY_URL = 'https://sharir-shilpi-proxy.srikar-3101.workers.dev';  // <-- e.g. 'https://sharir-shilpi-proxy.yourname.workers.dev'
+    const PROXY_URL = 'https://sharir-shilpi-proxy.srikar-3101.workers.dev';     // e.g. 'https://sharir-shilpi-proxy.srikar-3101.workers.dev'
+    const PROXY_SECRET = 'xhBcJcf37NkGJY0jYWFbRwQn8xDIWh3iFIIVWQrMSn0=';  // must match APP_SECRET set in Cloudflare Worker secrets
 
     async function anthropicFetch(prompt, maxTokens = 600) {
       if (!PROXY_URL || PROXY_URL.trim() === '') {
@@ -2411,7 +2412,10 @@
       }
       const resp = await fetch(PROXY_URL.trim(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-App-Token': PROXY_SECRET
+        },
         body: JSON.stringify({ prompt })
       });
       const data = await resp.json();
