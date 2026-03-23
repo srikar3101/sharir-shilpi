@@ -1,43 +1,56 @@
-<div id="auth-screen">
+<div class="auth-bg"></div>
+<div id="auth-screen" style="width: 100%; display: flex; justify-content: center; align-items: center;">
   <div class="card auth-card">
-    <div style="text-align: center; margin-bottom: 32px; padding: 0 8px;">
-      <h1 class="sidebar-logo" style="padding:0; margin-bottom:8px; font-size:32px; word-break: break-all;">Sharir Shilpi</h1>
-      <p style="color:var(--text-secondary); font-size:15px;">Authenticate to begin your journey.</p>
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h1 class="sidebar-logo" style="padding:0; margin-bottom:8px; font-size:40px; letter-spacing: -0.04em;">Sharir Shilpi</h1>
+      <p style="color:var(--text-s); font-size:16px; font-weight: 500;">Your journey to a sculpted life begins here.</p>
     </div>
 
     <div id="login-form">
       <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" />
-        <div class="form-error" id="login-email-error" style="color:var(--accent-error); font-size:12px; margin-top:4px;"></div>
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="login-email" type="email" placeholder="name@domain.com" />
+        <div class="form-error" id="login-email-error" style="color:var(--red); font-size:12px; margin-top:6px; font-weight: 500;"></div>
       </div>
-      <div class="form-group" style="margin-top: 16px;">
+      <div class="form-group">
         <label class="form-label">Password</label>
         <input class="form-input" id="login-pass" type="password" placeholder="••••••••" />
-        <div class="form-error" id="login-pass-error" style="color:var(--accent-error); font-size:12px; margin-top:4px;"></div>
+        <div class="form-error" id="login-pass-error" style="color:var(--red); font-size:12px; margin-top:6px; font-weight: 500;"></div>
       </div>
-      <button class="btn btn-primary btn-flow magnetic w-100" style="margin-top: 24px;" onclick="window.app.handleLogin()">Login</button>
-      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary);">
-        Don't have an account? <span style="color: var(--accent-primary); cursor: pointer; font-weight: 600;" onclick="window.app.toggleAuthMode('register')">Register</span>
+      
+      <button class="btn btn-primary w-100" style="margin-top: 12px; height: 48px;" onclick="window.app.handleLogin()">Sign In</button>
+
+      <div style="margin: 24px 0; display: flex; align-items: center; gap: 16px;">
+        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+        <span style="font-size: 12px; color: var(--text-m); font-weight: 600; text-transform: uppercase;">or</span>
+        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+      </div>
+
+      <!-- Google Sign-In Button Container -->
+      <div id="g_id_signin" style="display: flex; justify-content: center; margin-bottom: 24px;"></div>
+
+      <p style="text-align: center; font-size: 14px; color: var(--text-s);">
+        New here? <span style="color: var(--accent); cursor: pointer; font-weight: 700;" onclick="window.app.toggleAuthMode('register')">Create an account</span>
       </p>
     </div>
 
     <div id="register-form" style="display:none;">
       <div class="form-group">
         <label class="form-label">Full Name</label>
-        <input class="form-input" id="reg-name" type="text" placeholder="Srikar" />
+        <input class="form-input" id="reg-name" type="text" placeholder="John Doe" />
       </div>
-      <div class="form-group" style="margin-top: 16px;">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="reg-email" type="email" placeholder="you@example.com" />
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="reg-email" type="email" placeholder="name@domain.com" />
       </div>
-      <div class="form-group" style="margin-top: 16px;">
-        <label class="form-label">Password</label>
+      <div class="form-group">
+        <label class="form-label">Create Password</label>
         <input class="form-input" id="reg-pass" type="password" placeholder="••••••••" />
       </div>
-      <button class="btn btn-primary btn-flow magnetic w-100" style="margin-top: 24px;" onclick="window.app.handleRegister()">Create Account</button>
-      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary);">
-        Already have an account? <span style="color: var(--accent-primary); cursor: pointer; font-weight: 600;" onclick="window.app.toggleAuthMode('login')">Login</span>
+      <button class="btn btn-primary w-100" style="margin-top: 12px; height: 48px;" onclick="window.app.handleRegister()">Build Account</button>
+      
+      <p style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-s);">
+        Already have an account? <span style="color: var(--accent); cursor: pointer; font-weight: 700;" onclick="window.app.toggleAuthMode('login')">Sign In</span>
       </p>
     </div>
   </div>

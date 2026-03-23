@@ -61,6 +61,31 @@ window.app = {
     } else {
       loginForm.style.display = 'block';
       registerForm.style.display = 'none';
+      // Re-init google button if we switch back to login
+      window.app.renderGoogleButton();
+    }
+  },
+
+  renderGoogleButton: () => {
+    if (window.google && document.getElementById('g_id_signin')) {
+        google.accounts.id.renderButton(
+            document.getElementById('g_id_signin'),
+            { theme: 'outline', size: 'large', width: 340, shape: 'pill' }
+        );
+    }
+  },
+
+  handleGoogleLogin: async (response) => {
+    const loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'flex';
+    try {
+      // In a real app, send response.credential to your backend
+      await auth.loginGoogle(response.credential);
+      showToast('Signed in with Google');
+      await initApp();
+    } catch (e) {
+      if (loader) loader.style.display = 'none';
+      showToast(e.message);
     }
   },
 
@@ -448,6 +473,16 @@ async function initApp() {
     });
 
     await window.app.switchTab('dash');
+    
+    // Initialize Google Sign-In after components are loaded
+    if (window.google) {
+        google.accounts.id.initialize({
+            client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Placeholder
+            callback: window.app.handleGoogleLogin
+        });
+        window.app.renderGoogleButton();
+    }
+
     window.dispatchEvent(new CustomEvent('ss-content-updated'));
   } catch (err) {
     console.error("InitApp critical failure:", err);

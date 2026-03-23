@@ -28,7 +28,19 @@ export const auth = {
   },
 
   logout: () => ss('ss_active_user_data', null),
-  getCurrentUser: () => ls('ss_active_user_data', null)
+  getCurrentUser: () => ls('ss_active_user_data', null),
+
+  loginGoogle: async (credential) => {
+    // Mocking Google login for demonstration
+    // In a real app, you'd verify this JWT on the backend
+    const mockUser = {
+      email: 'google-user@example.com',
+      name: 'Google User',
+      isGoogle: true
+    };
+    ss('ss_active_user_data', mockUser);
+    return mockUser;
+  }
 };
 
 export const profileService = {
